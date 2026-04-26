@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Library Management System - DBMS Project Dashboard">
+    <title>Library Management System | DBMS Project</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-icon">📚</div>
+            <h1>LibraryDB<span>Management System</span></h1>
+        </div>
+        <nav>
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <button class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
+                    <span class="nav-icon">📊</span> Dashboard
+                </button>
+                <button class="nav-item" data-page="books" onclick="navigateTo('books')">
+                    <span class="nav-icon">📖</span> Books
+                    <span class="nav-badge">15</span>
+                </button>
+                <button class="nav-item" data-page="members" onclick="navigateTo('members')">
+                    <span class="nav-icon">👥</span> Members
+                </button>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Transactions</div>
+                <button class="nav-item" data-page="borrowings" onclick="navigateTo('borrowings')">
+                    <span class="nav-icon">🔄</span> Borrowings
+                </button>
+                <button class="nav-item" data-page="fines" onclick="navigateTo('fines')">
+                    <span class="nav-icon">💰</span> Fines
+                    <span class="nav-badge">2</span>
+                </button>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">DBMS</div>
+                <button class="nav-item" data-page="report" onclick="navigateTo('report')">
+                    <span class="nav-icon">📄</span> DBMS Report
+                </button>
+                <button class="nav-item" data-page="erdiagram" onclick="navigateTo('erdiagram')">
+                    <span class="nav-icon">🗂️</span> ER Diagram
+                </button>
+                <button class="nav-item" data-page="queries" onclick="navigateTo('queries')">
+                    <span class="nav-icon">🔍</span> SQL Queries
+                </button>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <p>DBMS Project · 2026</p>
+            <p>Library Management System</p>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <h2 id="page-title">Dashboard</h2>
+                <p id="page-subtitle">Overview of your library system</p>
+            </div>
+            <div class="header-right">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="global-search" placeholder="Search books, members..." oninput="handleSearch(event)">
+                </div>
+            </div>
+        </header>
+
+        <!-- PAGE: Dashboard -->
+        <section id="page-dashboard" class="page-section active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📚</div>
+                    <div class="stat-value" id="stat-books">0</div>
+                    <div class="stat-label">Total Book Copies</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-value" id="stat-members">0</div>
+                    <div class="stat-label">Registered Members</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📤</div>
+                    <div class="stat-value" id="stat-borrows">0</div>
+                    <div class="stat-label">Active Borrowings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-value" id="stat-fines">₹0</div>
+                    <div class="stat-label">Unpaid Fines</div>
+                </div>
+            </div>
+            <div class="content-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>📋 Recent Borrowings</h3>
+                    </div>
+                    <div class="card-body" style="padding:0">
+                        <table class="data-table">
+                            <thead><tr><th>Book</th><th>Member</th><th>Borrowed</th><th>Due</th><th>Status</th></tr></thead>
+                            <tbody id="recent-borrows-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>📊 Category Distribution</h3>
+                    </div>
+                    <div class="card-body" id="category-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE: Books -->
+        <section id="page-books" class="page-section">
+            <div class="books-grid" id="books-grid"></div>
+        </section>
+
+        <!-- PAGE: Members -->
+        <section id="page-members" class="page-section">
+            <div class="card">
+                <div class="card-header"><h3>👥 All Members</h3></div>
+                <div class="card-body" id="members-list"></div>
+            </div>
+        </section>
+
+        <!-- PAGE: Borrowings -->
+        <section id="page-borrowings" class="page-section">
+            <div class="card">
+                <div class="card-header"><h3>🔄 All Borrowing Records</h3></div>
+                <div class="card-body" style="padding:0">
+                    <table class="data-table">
+                        <thead><tr><th>ID</th><th>Book</th><th>Member</th><th>Borrowed</th><th>Due</th><th>Returned</th><th>Status</th></tr></thead>
+                        <tbody id="borrowings-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE: Fines -->
+        <section id="page-fines" class="page-section">
+            <div class="card">
+                <div class="card-header"><h3>💰 Fine Records</h3></div>
+                <div class="card-body" style="padding:0">
+                    <table class="data-table">
+                        <thead><tr><th>ID</th><th>Member</th><th>Book</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+                        <tbody id="fines-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE: SQL Queries -->
+        <section id="page-queries" class="page-section">
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-header"><h3>🔍 DBMS Concepts Demonstrated</h3></div>
+                <div class="card-body">
+                    <div class="tabs" id="query-tabs">
+                        <button class="tab-btn active" onclick="showQueryTab('joins')">Joins</button>
+                        <button class="tab-btn" onclick="showQueryTab('subqueries')">Subqueries</button>
+                        <button class="tab-btn" onclick="showQueryTab('aggregates')">Aggregates</button>
+                        <button class="tab-btn" onclick="showQueryTab('views')">Views</button>
+                        <button class="tab-btn" onclick="showQueryTab('triggers')">Triggers</button>
+                        <button class="tab-btn" onclick="showQueryTab('procedures')">Procedures</button>
+                    </div>
+
+                    <div id="qtab-joins" class="query-tab-content">
+                        <div class="query-block">
+                            <div class="query-header">
+                                <span class="query-title">INNER JOIN — Books with Authors</span>
+                                <span class="query-tag badge-info">JOIN</span>
+                            </div>
+                            <pre><span class="keyword">SELECT</span> b.title, <span class="function">CONCAT</span>(a.first_name, ' ', a.last_name) <span class="keyword">AS</span> author
+<span class="keyword">FROM</span> books b
+<span class="keyword">INNER JOIN</span> authors a <span class="keyword">ON</span> b.author_id = a.author_id;</pre>
+                        </div>
+                        <div class="query-block">
+                            <div class="query-header">
+                                <span class="query-title">LEFT JOIN — All Authors with Books</span>
+                                <span class="query-tag badge-info">JOIN</span>
+                            </div>
+                            <pre><span class="keyword">SELECT</span> <span class="function">CONCAT</span>(a.first_name, ' ', a.last_name) <span class="keyword">AS</span> author, b.title
+<span class="keyword">FROM</span> authors a
+<span class="keyword">LEFT JOIN</span> books b <span class="keyword">ON</span> a.author_id = b.author_id;</pre>
+                        </div>
+                        <div class="query-block">
+                            <div class="query-header">
+                                <span class="query-title">Multi-Table JOIN — Borrowing Details</span>
+                                <span class="query-tag badge-purple">COMPLEX</span>
+                            </div>
+                            <pre><span class="keyword">SELECT</span> br.borrow_id, m.first_name, b.title, s.first_name <span class="keyword">AS</span> staff
+<span class="keyword">FROM</span> borrowings br
+<span class="keyword">JOIN</span> members m <span class="keyword">ON</span> br.member_id = m.member_id
+<span class="keyword">JOIN</span> books b <span class="keyword">ON</span> br.book_id = b.book_id
+<span class="keyword">JOIN</span> staff s <span class="keyword">ON</span> br.staff_id = s.staff_id;</pre>
+                        </div>
+                    </div>
+
+                    <div id="qtab-subqueries" class="query-tab-content" style="display:none">
+                        <div class="query-block">
+                            <div class="query-header">
+                                <span class="query-title">Scalar Subquery — Books Above Average Price</span>
+                                <span class="query-tag badge-warning">SUBQUERY</span>
+                            </div>
+                            <pre><span class="keyword">SELECT</span> title, price <span class="keyword">FROM</span> books
+<span class="keyword">WHERE</span> price > (<span class="keyword">SELECT</span> <span class="function">AVG</span>(price) <span class="keyword">FROM</span> books);</pre>
+                        </div>
+                        <div class="query-block">
+                            <div class="query-header">
+                                <span class="query-title">Correlated Subquery</span>
+                                <span class="query-tag badge-danger">ADVANCED</span>
+                            </div>
+                            <pre><span class="keyword">SELECT</span> b.title, b.total_copies
+<span class="keyword">FROM</span> books b
+<span class="keyword">WHERE</span> b.total_copies &lt; (
+    <span class="keyword">SELECT</span> <span class="function">AVG</span>(b2.total_copies)
+    <span class="keyword">FROM</span> books b2
+    <span class="keyword">WHERE</span> b2.category_id = b.category_id
+);</pre>
+                        </div>
+                    </div>
+
+                    <div id="qtab-aggregates" class="query-tab-content" style="display:none">
+                        <div class="query-block">
+                            <div class="query-header">
+                                <span class="query-title">GROUP BY with HAVING</span>
+                                <span class="query-tag badge-success">AGGREGATE</span>
+                            </div>
+                            <pre><span class="keyword">SELECT</span> c.name, <span class="function">COUNT</span>(b.book_id) <span class="keyword">AS</span> book_count
+<span class="keyword">FROM</span> books b
+<span class="keyword">JOIN</span> categories c <span class="keyword">ON</span> b.category_id = c.category_id
+<span class="keyword">GROUP BY</span> c.name
+<span class="keyword">HAVING</span> <span class="function">COUNT</span>(b.book_id) > 2;</pre>
+                        </div>
+                        <div class="query-block">
+                            <div class="query-header">
+                                <span class="query-title">SUM, AVG, MIN, MAX</span>
+                                <span class="query-tag badge-success">AGGREGATE</span>
+                            </div>
+                            <pre><span class="keyword">SELECT</span> <span class="function">SUM</span>(price * total_copies) <span class="keyword">AS</span> total_value,
+       <span class="function">AVG</span>(price) <span class="keyword">AS</span> avg_price,
+       <span class="function">MIN</span>(price) <span class="keyword">AS</span> cheapest,
+       <span class="function">MAX</span>(price) <span class="keyword">AS</span> costliest
+<span class="keyword">FROM</span> books;</pre>
+                        </div>
+                    </div>
+
+                    <div id="qtab-views" class="query-tab-content" style="display:none">
+                        <div class="query-block">
+                            <div class="query-header">
+                                <span class="query-title">View — Active Borrowings Report</span>
+                                <span class="query-tag badge-info">VIEW</span>
+                            </div>
+                            <pre><span class="keyword">CREATE VIEW</span> vw_active_borrowings <span class="keyword">AS</span>
+<span class="keyword">SELECT</span> br.borrow_id, m.first_name, b.title,
+       br.borrow_date, br.due_date,
+       <span class="function">DATEDIFF</span>(<span class="function">CURRENT_DATE</span>, br.due_date) <span class="keyword">AS</span> days_overdue
+<span class="keyword">FROM</span> borrowings br
+<span class="keyword">JOIN</span> members m <span class="keyword">ON</span> br.member_id = m.member_id
+<span class="keyword">JOIN</span> books b <span class="keyword">ON</span> br.book_id = b.book_id
+<span class="keyword">WHERE</span> br.return_date <span class="keyword">IS NULL</span>;</pre>
+                        </div>
+                    </div>
+
+                    <div id="qtab-triggers" class="query-tab-content" style="display:none">
+                        <div class="query-block">
+                            <div class="query-header">
+                                <span class="query-title">Trigger — Auto Decrease Stock on Borrow</span>
+                                <span class="query-tag badge-danger">TRIGGER</span>
+                            </div>
+                            <pre><span class="keyword">CREATE TRIGGER</span> trg_after_borrow_insert
+<span class="keyword">AFTER INSERT ON</span> borrowings
+<span class="keyword">FOR EACH ROW</span>
+<span class="keyword">BEGIN</span>
+    <span class="keyword">UPDATE</span> books
+    <span class="keyword">SET</span> available_copies = available_copies - 1
+    <span class="keyword">WHERE</span> book_id = NEW.book_id;
+<span class="keyword">END</span>;</pre>
+                        </div>
+                    </div>
+
+                    <div id="qtab-procedures" class="query-tab-content" style="display:none">
+                        <div class="query-block">
+                            <div class="query-header">
+                                <span class="query-title">Stored Procedure — Borrow a Book</span>
+                                <span class="query-tag badge-purple">PROCEDURE</span>
+                            </div>
+                            <pre><span class="keyword">CREATE PROCEDURE</span> sp_borrow_book(
+    <span class="keyword">IN</span> p_book_id <span class="function">INT</span>,
+    <span class="keyword">IN</span> p_member_id <span class="function">INT</span>,
+    <span class="keyword">IN</span> p_staff_id <span class="function">INT</span>
+)
+<span class="keyword">BEGIN</span>
+    <span class="keyword">DECLARE</span> v_avail <span class="function">INT</span>;
+    <span class="keyword">SELECT</span> available_copies <span class="keyword">INTO</span> v_avail
+    <span class="keyword">FROM</span> books <span class="keyword">WHERE</span> book_id = p_book_id;
+    <span class="keyword">IF</span> v_avail > 0 <span class="keyword">THEN</span>
+        <span class="keyword">INSERT INTO</span> borrowings (...) <span class="keyword">VALUES</span> (...);
+    <span class="keyword">END IF</span>;
+<span class="keyword">END</span>;</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE: DBMS Report -->
+        <section id="page-report" class="page-section">
+            <!-- Topics Overview -->
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-header"><h3>📋 DBMS Topics Covered in This Project</h3></div>
+                <div class="card-body">
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+                        <div class="topic-chip" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);border-radius:10px;padding:14px">
+                            <div style="font-size:13px;font-weight:700;color:#3b82f6;margin-bottom:4px">1. ER Diagram</div>
+                            <div style="font-size:11px;color:#94a3b8">Entity-Relationship model with 9 entities, attributes & relationships</div>
+                        </div>
+                        <div class="topic-chip" style="background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:14px">
+                            <div style="font-size:13px;font-weight:700;color:#8b5cf6;margin-bottom:4px">2. Relational Model</div>
+                            <div style="font-size:11px;color:#94a3b8">ER to relational schema mapping with 9 tables</div>
+                        </div>
+                        <div class="topic-chip" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:14px">
+                            <div style="font-size:13px;font-weight:700;color:#10b981;margin-bottom:4px">3. Normalization</div>
+                            <div style="font-size:11px;color:#94a3b8">All tables in 1NF → 2NF → 3NF → BCNF</div>
+                        </div>
+                        <div class="topic-chip" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:14px">
+                            <div style="font-size:13px;font-weight:700;color:#f59e0b;margin-bottom:4px">4. DDL</div>
+                            <div style="font-size:11px;color:#94a3b8">CREATE DATABASE, CREATE TABLE, ALTER TABLE, DROP TABLE</div>
+                        </div>
+                        <div class="topic-chip" style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.2);border-radius:10px;padding:14px">
+                            <div style="font-size:13px;font-weight:700;color:#f43f5e;margin-bottom:4px">5. DML</div>
+                            <div style="font-size:11px;color:#94a3b8">INSERT (74+ records), UPDATE, DELETE operations</div>
+                        </div>
+                        <div class="topic-chip" style="background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.2);border-radius:10px;padding:14px">
+                            <div style="font-size:13px;font-weight:700;color:#06b6d4;margin-bottom:4px">6. Constraints</div>
+                            <div style="font-size:11px;color:#94a3b8">PK, FK, UNIQUE, NOT NULL, CHECK, DEFAULT, AUTO_INCREMENT</div>
+                        </div>
+                        <div class="topic-chip" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);border-radius:10px;padding:14px">
+                            <div style="font-size:13px;font-weight:700;color:#3b82f6;margin-bottom:4px">7. Joins</div>
+                            <div style="font-size:11px;color:#94a3b8">INNER, LEFT, RIGHT, CROSS, Self Join</div>
+                        </div>
+                        <div class="topic-chip" style="background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:14px">
+                            <div style="font-size:13px;font-weight:700;color:#8b5cf6;margin-bottom:4px">8. Subqueries</div>
+                            <div style="font-size:11px;color:#94a3b8">Scalar, Correlated, Nested, EXISTS, IN/NOT IN</div>
+                        </div>
+                        <div class="topic-chip" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:14px">
+                            <div style="font-size:13px;font-weight:700;color:#10b981;margin-bottom:4px">9. Aggregates</div>
+                            <div style="font-size:11px;color:#94a3b8">COUNT, SUM, AVG, MIN, MAX + GROUP BY & HAVING</div>
+                        </div>
+                        <div class="topic-chip" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:14px">
+                            <div style="font-size:13px;font-weight:700;color:#f59e0b;margin-bottom:4px">10. Views</div>
+                            <div style="font-size:11px;color:#94a3b8">5 views for reports & dashboard stats</div>
+                        </div>
+                        <div class="topic-chip" style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.2);border-radius:10px;padding:14px">
+                            <div style="font-size:13px;font-weight:700;color:#f43f5e;margin-bottom:4px">11. Indexes</div>
+                            <div style="font-size:11px;color:#94a3b8">7 indexes for query optimization</div>
+                        </div>
+                        <div class="topic-chip" style="background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.2);border-radius:10px;padding:14px">
+                            <div style="font-size:13px;font-weight:700;color:#06b6d4;margin-bottom:4px">12. Triggers</div>
+                            <div style="font-size:11px;color:#94a3b8">5 triggers — auto stock update, auto fine, validation</div>
+                        </div>
+                        <div class="topic-chip" style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);border-radius:10px;padding:14px">
+                            <div style="font-size:13px;font-weight:700;color:#3b82f6;margin-bottom:4px">13. Stored Procedures</div>
+                            <div style="font-size:11px;color:#94a3b8">4 procedures — borrow, return, search, report</div>
+                        </div>
+                        <div class="topic-chip" style="background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2);border-radius:10px;padding:14px">
+                            <div style="font-size:13px;font-weight:700;color:#8b5cf6;margin-bottom:4px">14. Functions</div>
+                            <div style="font-size:11px;color:#94a3b8">2 functions — calculate fine, check availability</div>
+                        </div>
+                        <div class="topic-chip" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);border-radius:10px;padding:14px">
+                            <div style="font-size:13px;font-weight:700;color:#10b981;margin-bottom:4px">15. Cursors</div>
+                            <div style="font-size:11px;color:#94a3b8">Cursor-based overdue book processing with handler</div>
+                        </div>
+                        <div class="topic-chip" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:14px">
+                            <div style="font-size:13px;font-weight:700;color:#f59e0b;margin-bottom:4px">16. Transactions</div>
+                            <div style="font-size:11px;color:#94a3b8">COMMIT, ROLLBACK, SAVEPOINT demonstrations</div>
+                        </div>
+                        <div class="topic-chip" style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.2);border-radius:10px;padding:14px">
+                            <div style="font-size:13px;font-weight:700;color:#f43f5e;margin-bottom:4px">17. DCL</div>
+                            <div style="font-size:11px;color:#94a3b8">CREATE USER, GRANT, REVOKE permissions</div>
+                        </div>
+                        <div class="topic-chip" style="background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.2);border-radius:10px;padding:14px">
+                            <div style="font-size:13px;font-weight:700;color:#06b6d4;margin-bottom:4px">18. TCL</div>
+                            <div style="font-size:11px;color:#94a3b8">Transaction Control — START, COMMIT, ROLLBACK</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Normalization -->
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-header"><h3>📐 Normalization</h3></div>
+                <div class="card-body">
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px">
+                        <div style="text-align:center;padding:20px;background:rgba(59,130,246,0.08);border-radius:12px;border:1px solid rgba(59,130,246,0.15)">
+                            <div style="font-size:24px;font-weight:800;color:#3b82f6">1NF</div>
+                            <div style="font-size:11px;color:#94a3b8;margin-top:6px">Atomic values<br>No repeating groups<br>Unique rows (PK)</div>
+                            <div style="font-size:20px;margin-top:8px">✅</div>
+                        </div>
+                        <div style="text-align:center;padding:20px;background:rgba(139,92,246,0.08);border-radius:12px;border:1px solid rgba(139,92,246,0.15)">
+                            <div style="font-size:24px;font-weight:800;color:#8b5cf6">2NF</div>
+                            <div style="font-size:11px;color:#94a3b8;margin-top:6px">In 1NF +<br>No partial dependencies<br>Full functional dep.</div>
+                            <div style="font-size:20px;margin-top:8px">✅</div>
+                        </div>
+                        <div style="text-align:center;padding:20px;background:rgba(16,185,129,0.08);border-radius:12px;border:1px solid rgba(16,185,129,0.15)">
+                            <div style="font-size:24px;font-weight:800;color:#10b981">3NF</div>
+                            <div style="font-size:11px;color:#94a3b8;margin-top:6px">In 2NF +<br>No transitive deps<br>Authors separate table</div>
+                            <div style="font-size:20px;margin-top:8px">✅</div>
+                        </div>
+                        <div style="text-align:center;padding:20px;background:rgba(245,158,11,0.08);border-radius:12px;border:1px solid rgba(245,158,11,0.15)">
+                            <div style="font-size:24px;font-weight:800;color:#f59e0b">BCNF</div>
+                            <div style="font-size:11px;color:#94a3b8;margin-top:6px">In 3NF +<br>Every determinant<br>is a candidate key</div>
+                            <div style="font-size:20px;margin-top:8px">✅</div>
+                        </div>
+                    </div>
+                    <div style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:16px">
+                        <div style="font-size:13px;font-weight:600;color:#f1f5f9;margin-bottom:8px">📝 Normalization Example — Why author info is in a separate table:</div>
+                        <div style="font-size:12px;color:#94a3b8;line-height:1.8">
+                            <strong style="color:#f43f5e">Before (Unnormalized):</strong> Books table had author_name, author_email, author_nationality → repeated for each book by same author (redundancy!)<br>
+                            <strong style="color:#10b981">After (3NF):</strong> Created separate <code style="background:rgba(255,255,255,0.06);padding:2px 6px;border-radius:4px">authors</code> table → books references via <code style="background:rgba(255,255,255,0.06);padding:2px 6px;border-radius:4px">author_id</code> (FK) → No redundancy ✅
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schema Overview -->
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-header"><h3>🗄️ Database Schema — 9 Tables</h3></div>
+                <div class="card-body" style="padding:0">
+                    <table class="data-table">
+                        <thead><tr><th>Table</th><th>Primary Key</th><th>Foreign Keys</th><th>Records</th><th>Key Constraints</th></tr></thead>
+                        <tbody>
+                            <tr><td style="color:#3b82f6;font-weight:600">authors</td><td>author_id</td><td>—</td><td>10</td><td>UNIQUE(email), CHECK(email format)</td></tr>
+                            <tr><td style="color:#8b5cf6;font-weight:600">publishers</td><td>publisher_id</td><td>—</td><td>6</td><td>UNIQUE(name, email)</td></tr>
+                            <tr><td style="color:#10b981;font-weight:600">categories</td><td>category_id</td><td>—</td><td>8</td><td>UNIQUE(name)</td></tr>
+                            <tr><td style="color:#f59e0b;font-weight:600">books</td><td>book_id</td><td>author_id, publisher_id, category_id</td><td>15</td><td>UNIQUE(isbn), CHECK(price≥0, year range)</td></tr>
+                            <tr><td style="color:#f43f5e;font-weight:600">members</td><td>member_id</td><td>—</td><td>10</td><td>UNIQUE(email), ENUM(membership), DEFAULT</td></tr>
+                            <tr><td style="color:#06b6d4;font-weight:600">staff</td><td>staff_id</td><td>—</td><td>5</td><td>UNIQUE(email), ENUM(role), CHECK(salary≥0)</td></tr>
+                            <tr><td style="color:#ec4899;font-weight:600">borrowings</td><td>borrow_id</td><td>book_id, member_id, staff_id</td><td>12</td><td>ENUM(status), CHECK(due≥borrow date)</td></tr>
+                            <tr><td style="color:#14b8a6;font-weight:600">fines</td><td>fine_id</td><td>borrow_id</td><td>3</td><td>CHECK(amount>0), ON DELETE CASCADE</td></tr>
+                            <tr><td style="color:#6366f1;font-weight:600">reservations</td><td>reservation_id</td><td>book_id, member_id</td><td>5</td><td>ENUM(status), ON DELETE CASCADE</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SQL Files -->
+            <div class="card">
+                <div class="card-header"><h3>📂 SQL Script Files</h3></div>
+                <div class="card-body">
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+                        <div style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:16px">
+                            <div style="font-size:13px;font-weight:700;color:#3b82f6;margin-bottom:4px">01_schema.sql</div>
+                            <div style="font-size:11px;color:#94a3b8">DDL — CREATE DATABASE, 9 CREATE TABLE with all constraints, ALTER TABLE</div>
+                        </div>
+                        <div style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:16px">
+                            <div style="font-size:13px;font-weight:700;color:#8b5cf6;margin-bottom:4px">02_insert_data.sql</div>
+                            <div style="font-size:11px;color:#94a3b8">DML — INSERT 74+ records across all 9 tables</div>
+                        </div>
+                        <div style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:16px">
+                            <div style="font-size:13px;font-weight:700;color:#10b981;margin-bottom:4px">03_queries.sql</div>
+                            <div style="font-size:11px;color:#94a3b8">37 queries — SELECT, WHERE, LIKE, Joins, Subqueries, GROUP BY, HAVING</div>
+                        </div>
+                        <div style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:16px">
+                            <div style="font-size:13px;font-weight:700;color:#f59e0b;margin-bottom:4px">04_views.sql</div>
+                            <div style="font-size:11px;color:#94a3b8">5 CREATE VIEW — catalog, borrowings, history, fines, stats</div>
+                        </div>
+                        <div style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:16px">
+                            <div style="font-size:13px;font-weight:700;color:#f43f5e;margin-bottom:4px">05_indexes.sql</div>
+                            <div style="font-size:11px;color:#94a3b8">7 CREATE INDEX — single column & composite indexes</div>
+                        </div>
+                        <div style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:16px">
+                            <div style="font-size:13px;font-weight:700;color:#06b6d4;margin-bottom:4px">06_triggers.sql</div>
+                            <div style="font-size:11px;color:#94a3b8">5 triggers — stock mgmt, auto fine, validation</div>
+                        </div>
+                        <div style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:16px">
+                            <div style="font-size:13px;font-weight:700;color:#ec4899;margin-bottom:4px">07_procedures_functions.sql</div>
+                            <div style="font-size:11px;color:#94a3b8">4 procedures, 2 functions, 1 cursor with handler</div>
+                        </div>
+                        <div style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:16px">
+                            <div style="font-size:13px;font-weight:700;color:#14b8a6;margin-bottom:4px">08_transactions.sql</div>
+                            <div style="font-size:11px;color:#94a3b8">COMMIT, ROLLBACK, SAVEPOINT, ROLLBACK TO</div>
+                        </div>
+                        <div style="background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:16px">
+                            <div style="font-size:13px;font-weight:700;color:#6366f1;margin-bottom:4px">09_dcl.sql</div>
+                            <div style="font-size:11px;color:#94a3b8">CREATE USER, GRANT, REVOKE, FLUSH PRIVILEGES</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE: ER Diagram -->
+        <section id="page-erdiagram" class="page-section">
+            <div class="card" style="margin-bottom:20px">
+                <div class="card-header"><h3>🗂️ Entity-Relationship Diagram</h3></div>
+                <div class="card-body">
+                    <div id="er-diagram-visual" style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:32px;overflow-x:auto"></div>
+                </div>
+            </div>
+            <div class="content-grid">
+                <div class="card">
+                    <div class="card-header"><h3>📊 Relationships</h3></div>
+                    <div class="card-body" style="padding:0">
+                        <table class="data-table">
+                            <thead><tr><th>From</th><th>To</th><th>Type</th><th>Description</th></tr></thead>
+                            <tbody>
+                                <tr><td style="color:#3b82f6;font-weight:600">Authors</td><td>Books</td><td><span class="badge badge-info">1:M</span></td><td>One author writes many books</td></tr>
+                                <tr><td style="color:#8b5cf6;font-weight:600">Publishers</td><td>Books</td><td><span class="badge badge-info">1:M</span></td><td>One publisher publishes many books</td></tr>
+                                <tr><td style="color:#10b981;font-weight:600">Categories</td><td>Books</td><td><span class="badge badge-info">1:M</span></td><td>One category has many books</td></tr>
+                                <tr><td style="color:#f59e0b;font-weight:600">Books</td><td>Borrowings</td><td><span class="badge badge-info">1:M</span></td><td>One book borrowed multiple times</td></tr>
+                                <tr><td style="color:#f43f5e;font-weight:600">Members</td><td>Borrowings</td><td><span class="badge badge-info">1:M</span></td><td>One member borrows many books</td></tr>
+                                <tr><td style="color:#06b6d4;font-weight:600">Staff</td><td>Borrowings</td><td><span class="badge badge-info">1:M</span></td><td>One staff processes many borrowings</td></tr>
+                                <tr><td style="color:#ec4899;font-weight:600">Borrowings</td><td>Fines</td><td><span class="badge badge-warning">1:1</span></td><td>One borrowing may have one fine</td></tr>
+                                <tr><td style="color:#f59e0b;font-weight:600">Books</td><td>Reservations</td><td><span class="badge badge-info">1:M</span></td><td>One book can be reserved many times</td></tr>
+                                <tr><td style="color:#f43f5e;font-weight:600">Members</td><td>Reservations</td><td><span class="badge badge-info">1:M</span></td><td>One member makes many reservations</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>🔑 Keys Used</h3></div>
+                    <div class="card-body" style="padding:0">
+                        <table class="data-table">
+                            <thead><tr><th>Type</th><th>Table</th><th>Column(s)</th></tr></thead>
+                            <tbody>
+                                <tr><td><span class="badge badge-success">PK</span></td><td>All tables</td><td>*_id (AUTO_INCREMENT)</td></tr>
+                                <tr><td><span class="badge badge-info">FK</span></td><td>books</td><td>author_id, publisher_id, category_id</td></tr>
+                                <tr><td><span class="badge badge-info">FK</span></td><td>borrowings</td><td>book_id, member_id, staff_id</td></tr>
+                                <tr><td><span class="badge badge-info">FK</span></td><td>fines</td><td>borrow_id</td></tr>
+                                <tr><td><span class="badge badge-info">FK</span></td><td>reservations</td><td>book_id, member_id</td></tr>
+                                <tr><td><span class="badge badge-purple">UK</span></td><td>books</td><td>isbn</td></tr>
+                                <tr><td><span class="badge badge-purple">UK</span></td><td>members</td><td>email</td></tr>
+                                <tr><td><span class="badge badge-purple">UK</span></td><td>authors</td><td>email</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<script src="app.js"></script>
+<script>
+function showQueryTab(tab) {
+    document.querySelectorAll('.query-tab-content').forEach(c => c.style.display = 'none');
+    document.querySelectorAll('#query-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('qtab-' + tab).style.display = 'block';
+    event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

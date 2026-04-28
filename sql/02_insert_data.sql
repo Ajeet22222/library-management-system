@@ -105,3 +105,96 @@ INSERT INTO reservations (book_id, member_id, reservation_date, status) VALUES
 (1,8,'2026-01-15','Pending'),
 (10,1,'2026-02-01','Cancelled'),
 (4,6,'2026-03-01','Pending');
+
+-- 10. UPDATE MEMBERS — set expiry dates (1 year from join for Basic/Student, 2 years for Premium)
+UPDATE members SET expiry_date = DATE_ADD(join_date, INTERVAL 1 YEAR) WHERE membership_type IN ('Basic', 'Student');
+UPDATE members SET expiry_date = DATE_ADD(join_date, INTERVAL 2 YEAR) WHERE membership_type = 'Premium';
+
+-- 11. UPDATE STAFF — set password hashes (simulated bcrypt hashes for demo)
+UPDATE staff SET password_hash = '$2b$10$xJwL5kZ8QmR9vN3pY7uWe.admin.hash.demo' WHERE role = 'Admin';
+UPDATE staff SET password_hash = '$2b$10$xJwL5kZ8QmR9vN3pY7uWe.manager.hash.demo' WHERE role = 'Manager';
+UPDATE staff SET password_hash = '$2b$10$xJwL5kZ8QmR9vN3pY7uWe.librarian.hash.demo' WHERE role = 'Librarian';
+UPDATE staff SET password_hash = '$2b$10$xJwL5kZ8QmR9vN3pY7uWe.assistant.hash.demo' WHERE role = 'Assistant';
+
+-- 12. BOOK COPIES — individual copy-level records
+INSERT INTO book_copies (book_id, copy_number, condition_status, location, acquired_date) VALUES
+(1,1,'Good','Main Shelf','2020-06-15'),
+(1,2,'Good','Main Shelf','2020-06-15'),
+(1,3,'Good','Reading Room','2021-03-10'),
+(1,4,'Damaged','Repair Desk','2020-06-15'),
+(1,5,'Good','Main Shelf','2022-01-20'),
+(2,1,'Good','Main Shelf','2021-04-01'),
+(2,2,'Good','Reading Room','2021-04-01'),
+(2,3,'Damaged','Repair Desk','2022-07-15'),
+(2,4,'Good','Main Shelf','2023-01-10'),
+(3,1,'Good','Main Shelf','2019-08-20'),
+(3,2,'Good','Reference Section','2019-08-20'),
+(3,3,'Good','Main Shelf','2020-11-05'),
+(4,1,'Good','Main Shelf','2020-01-15'),
+(4,2,'Good','Main Shelf','2020-01-15'),
+(4,3,'Good','Reading Room','2021-06-20'),
+(4,4,'Good','Main Shelf','2021-06-20'),
+(4,5,'Good','Main Shelf','2022-09-01'),
+(4,6,'Good','Reference Section','2023-03-15'),
+(5,1,'Good','Main Shelf','2020-02-10'),
+(5,2,'Good','Main Shelf','2020-02-10'),
+(5,3,'Good','Reading Room','2021-07-25'),
+(5,4,'Damaged','Repair Desk','2020-02-10'),
+(5,5,'Good','Main Shelf','2022-10-15'),
+(6,1,'Good','Main Shelf','2019-05-01'),
+(6,2,'Good','Main Shelf','2019-05-01'),
+(6,3,'Good','Reference Section','2020-09-10'),
+(6,4,'Good','Reading Room','2021-12-20'),
+(7,1,'Good','Main Shelf','2019-05-01'),
+(7,2,'Good','Reading Room','2020-09-10'),
+(7,3,'Damaged','Repair Desk','2019-05-01'),
+(8,1,'Good','Main Shelf','2020-03-15'),
+(8,2,'Good','Main Shelf','2020-03-15'),
+(8,3,'Good','Reading Room','2021-08-10'),
+(8,4,'Good','Main Shelf','2022-04-20'),
+(9,1,'Good','Main Shelf','2020-07-01'),
+(9,2,'Good','Reference Section','2021-01-15'),
+(9,3,'Good','Main Shelf','2022-06-10'),
+(10,1,'Good','Main Shelf','2019-11-20'),
+(10,2,'Good','Main Shelf','2019-11-20'),
+(10,3,'Good','Reading Room','2020-05-30'),
+(10,4,'Good','Main Shelf','2021-10-15'),
+(10,5,'Good','Main Shelf','2022-08-25'),
+(11,1,'Good','Main Shelf','2019-09-01'),
+(11,2,'Good','Main Shelf','2019-09-01'),
+(11,3,'Good','Reading Room','2020-04-20'),
+(11,4,'Good','Main Shelf','2021-02-10'),
+(11,5,'Good','Reference Section','2022-01-05'),
+(11,6,'Good','Main Shelf','2023-05-15'),
+(12,1,'Good','Main Shelf','2019-12-10'),
+(12,2,'Good','Main Shelf','2020-06-25'),
+(12,3,'Good','Reading Room','2021-03-30'),
+(12,4,'Good','Main Shelf','2022-09-15'),
+(13,1,'Good','Main Shelf','2020-01-20'),
+(13,2,'Good','Reference Section','2021-05-10'),
+(13,3,'Good','Main Shelf','2022-11-20'),
+(14,1,'Good','Main Shelf','2020-08-15'),
+(14,2,'Good','Main Shelf','2021-04-20'),
+(14,3,'Good','Reading Room','2022-07-30'),
+(14,4,'Good','Main Shelf','2023-02-10'),
+(15,1,'Good','Main Shelf','2021-01-05'),
+(15,2,'Good','Reading Room','2021-01-05'),
+(15,3,'Good','Main Shelf','2022-05-20');
+
+-- 13. AUDIT LOGS — sample action trail
+INSERT INTO audit_logs (action_type, table_name, record_id, staff_id, old_values, new_values, action_time) VALUES
+('INSERT','borrowings',1,2,NULL,'{"book_id":1,"member_id":1,"status":"Borrowed"}','2025-10-01 09:30:00'),
+('UPDATE','borrowings',1,2,'{"status":"Borrowed","return_date":null}','{"status":"Returned","return_date":"2025-10-14"}','2025-10-14 14:15:00'),
+('INSERT','borrowings',2,2,NULL,'{"book_id":4,"member_id":2,"status":"Borrowed"}','2025-10-05 10:00:00'),
+('UPDATE','borrowings',2,2,'{"status":"Borrowed","return_date":null}','{"status":"Returned","return_date":"2025-10-18"}','2025-10-18 11:30:00'),
+('INSERT','borrowings',3,3,NULL,'{"book_id":6,"member_id":3,"status":"Borrowed"}','2025-11-01 09:45:00'),
+('UPDATE','borrowings',3,3,'{"status":"Borrowed","return_date":null}','{"status":"Returned","return_date":"2025-11-20"}','2025-11-20 16:00:00'),
+('INSERT','fines',1,3,NULL,'{"borrow_id":3,"amount":50,"paid":false}','2025-11-20 16:05:00'),
+('UPDATE','fines',1,2,'{"paid":false}','{"paid":true}','2025-11-22 10:30:00'),
+('INSERT','members',1,5,NULL,'{"name":"Aarav Sharma","type":"Student"}','2025-01-10 09:00:00'),
+('INSERT','members',2,5,NULL,'{"name":"Priya Patel","type":"Premium"}','2025-02-15 10:30:00'),
+('LOGIN','staff',5,5,NULL,'{"role":"Admin","login_time":"2025-10-01 09:00:00"}','2025-10-01 09:00:00'),
+('LOGIN','staff',2,2,NULL,'{"role":"Librarian","login_time":"2025-10-01 09:15:00"}','2025-10-01 09:15:00'),
+('INSERT','borrowings',5,4,NULL,'{"book_id":11,"member_id":5,"status":"Borrowed"}','2025-12-01 11:00:00'),
+('INSERT','reservations',1,2,NULL,'{"book_id":3,"member_id":3,"status":"Pending"}','2025-12-01 14:00:00'),
+('UPDATE','books',1,2,'{"price":199.00}','{"price":218.90}','2026-01-15 10:00:00');

@@ -1,297 +1,468 @@
 // ============================================================
-// LIBRARY MANAGEMENT SYSTEM — Dashboard Logic
+// LIBRARY MANAGEMENT SYSTEM — Full Dashboard Logic with API
 // ============================================================
 
-// ---- Sample Data (simulates database) ----
-const books = [
-    {id:1,title:"Five Point Someone",author:"Chetan Bhagat",category:"Fiction",price:199,total:5,available:3,year:2004,isbn:"9788129135728"},
-    {id:2,title:"2 States",author:"Chetan Bhagat",category:"Romance",price:175,total:4,available:2,year:2009,isbn:"9788129135490"},
-    {id:3,title:"Malgudi Days",author:"R.K. Narayan",category:"Fiction",price:250,total:3,available:1,year:1943,isbn:"9780143039655"},
-    {id:4,title:"Harry Potter & Philosopher's Stone",author:"J.K. Rowling",category:"Fantasy",price:499,total:6,available:4,year:1997,isbn:"9780747532699"},
-    {id:5,title:"Harry Potter & Chamber of Secrets",author:"J.K. Rowling",category:"Fantasy",price:450,total:5,available:3,year:1998,isbn:"9780747538486"},
-    {id:6,title:"1984",author:"George Orwell",category:"Sci-Fi",price:299,total:4,available:2,year:1949,isbn:"9780451524935"},
-    {id:7,title:"Animal Farm",author:"George Orwell",category:"Fiction",price:199,total:3,available:1,year:1945,isbn:"9780451526342"},
-    {id:8,title:"The Blue Umbrella",author:"Ruskin Bond",category:"Fiction",price:150,total:4,available:3,year:1980,isbn:"9788171673407"},
-    {id:9,title:"The God of Small Things",author:"Arundhati Roy",category:"Fiction",price:350,total:3,available:2,year:1997,isbn:"9780679457312"},
-    {id:10,title:"The Da Vinci Code",author:"Dan Brown",category:"Mystery",price:399,total:5,available:3,year:2003,isbn:"9780307474278"},
-    {id:11,title:"The Alchemist",author:"Paulo Coelho",category:"Self-Help",price:250,total:6,available:4,year:1988,isbn:"9780062315007"},
-    {id:12,title:"Murder on Orient Express",author:"Agatha Christie",category:"Mystery",price:299,total:4,available:2,year:1934,isbn:"9780062693662"},
-    {id:13,title:"And Then There Were None",author:"Agatha Christie",category:"Mystery",price:275,total:3,available:1,year:1939,isbn:"9780062073488"},
-    {id:14,title:"Wise and Otherwise",author:"Sudha Murthy",category:"Non-Fiction",price:225,total:4,available:3,year:2006,isbn:"9780143418870"},
-    {id:15,title:"Dollar Bahu",author:"Sudha Murthy",category:"Fiction",price:195,total:3,available:2,year:2007,isbn:"9780143028420"}
-];
-
-const members = [
-    {id:1,name:"Aarav Sharma",email:"aarav.sharma@gmail.com",type:"Student",joined:"2025-01-10",borrows:2},
-    {id:2,name:"Priya Patel",email:"priya.patel@gmail.com",type:"Premium",joined:"2025-02-15",borrows:2},
-    {id:3,name:"Rohan Kumar",email:"rohan.kumar@gmail.com",type:"Student",joined:"2025-03-01",borrows:1},
-    {id:4,name:"Sneha Gupta",email:"sneha.gupta@gmail.com",type:"Basic",joined:"2025-01-20",borrows:1},
-    {id:5,name:"Vikram Singh",email:"vikram.singh@gmail.com",type:"Premium",joined:"2025-04-05",borrows:1},
-    {id:6,name:"Ananya Reddy",email:"ananya.reddy@gmail.com",type:"Student",joined:"2025-02-28",borrows:1},
-    {id:7,name:"Arjun Nair",email:"arjun.nair@gmail.com",type:"Basic",joined:"2025-05-10",borrows:1},
-    {id:8,name:"Ishita Verma",email:"ishita.verma@gmail.com",type:"Student",joined:"2025-03-15",borrows:1},
-    {id:9,name:"Karan Joshi",email:"karan.joshi@gmail.com",type:"Premium",joined:"2025-01-05",borrows:1},
-    {id:10,name:"Diya Iyer",email:"diya.iyer@gmail.com",type:"Basic",joined:"2025-06-01",borrows:1}
-];
-
-const borrowings = [
-    {id:1,book:"Five Point Someone",member:"Aarav Sharma",staff:"Sunita Devi",bDate:"2025-10-01",dDate:"2025-10-15",rDate:"2025-10-14",status:"Returned"},
-    {id:2,book:"Harry Potter & Philosopher's Stone",member:"Priya Patel",staff:"Sunita Devi",bDate:"2025-10-05",dDate:"2025-10-19",rDate:"2025-10-18",status:"Returned"},
-    {id:3,book:"1984",member:"Rohan Kumar",staff:"Amit Prasad",bDate:"2025-11-01",dDate:"2025-11-15",rDate:"2025-11-20",status:"Returned"},
-    {id:4,book:"The Da Vinci Code",member:"Sneha Gupta",staff:"Sunita Devi",bDate:"2025-11-10",dDate:"2025-11-24",rDate:"2025-11-23",status:"Returned"},
-    {id:5,book:"The Alchemist",member:"Vikram Singh",staff:"Kavita Rao",bDate:"2025-12-01",dDate:"2025-12-15",rDate:null,status:"Borrowed"},
-    {id:6,book:"Malgudi Days",member:"Ananya Reddy",staff:"Sunita Devi",bDate:"2025-12-05",dDate:"2025-12-19",rDate:null,status:"Borrowed"},
-    {id:7,book:"Animal Farm",member:"Arjun Nair",staff:"Amit Prasad",bDate:"2025-12-10",dDate:"2025-12-24",rDate:null,status:"Overdue"},
-    {id:8,book:"The God of Small Things",member:"Aarav Sharma",staff:"Sunita Devi",bDate:"2026-01-05",dDate:"2026-01-19",rDate:"2026-01-18",status:"Returned"},
-    {id:9,book:"Murder on Orient Express",member:"Ishita Verma",staff:"Kavita Rao",bDate:"2026-01-10",dDate:"2026-01-24",rDate:null,status:"Borrowed"},
-    {id:10,book:"2 States",member:"Karan Joshi",staff:"Sunita Devi",bDate:"2026-02-01",dDate:"2026-02-15",rDate:"2026-02-20",status:"Returned"},
-    {id:11,book:"Harry Potter & Chamber of Secrets",member:"Diya Iyer",staff:"Amit Prasad",bDate:"2026-03-01",dDate:"2026-03-15",rDate:null,status:"Borrowed"},
-    {id:12,book:"Wise and Otherwise",member:"Priya Patel",staff:"Sunita Devi",bDate:"2026-03-10",dDate:"2026-03-24",rDate:null,status:"Borrowed"}
-];
-
-const fines = [
-    {id:1,member:"Rohan Kumar",book:"1984",amount:50,paid:true,date:"2025-11-20"},
-    {id:2,member:"Arjun Nair",book:"Animal Farm",amount:100,paid:false,date:"2025-12-25"},
-    {id:3,member:"Karan Joshi",book:"2 States",amount:50,paid:false,date:"2026-02-20"}
-];
-
+const API = '';
 const categoryColors = {
-    "Fiction":"#8b5cf6","Romance":"#f43f5e","Fantasy":"#3b82f6","Sci-Fi":"#06b6d4",
-    "Mystery":"#f59e0b","Self-Help":"#10b981","Non-Fiction":"#ec4899","Academic":"#6366f1"
+  "Fiction":"#8b5cf6","Romance":"#f43f5e","Fantasy":"#3b82f6","Sci-Fi":"#06b6d4",
+  "Mystery":"#f59e0b","Self-Help":"#10b981","Non-Fiction":"#ec4899","Academic":"#6366f1"
 };
-
 const avatarColors = ["#3b82f6","#8b5cf6","#10b981","#f59e0b","#f43f5e","#06b6d4","#ec4899","#6366f1","#14b8a6","#e11d48"];
+let currentUser = null;
+
+// ---- Helpers ----
+async function api(path, opts = {}) {
+  const res = await fetch(API + path, {
+    ...opts, credentials: 'include',
+    headers: { 'Content-Type': 'application/json', ...opts.headers },
+    body: opts.body ? JSON.stringify(opts.body) : undefined
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+function toast(msg, type = 'info') {
+  const c = document.getElementById('toast-container');
+  const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+  const t = document.createElement('div');
+  t.className = `toast toast-${type}`;
+  t.innerHTML = `<span class="toast-icon">${icons[type]}</span><span class="toast-msg">${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(() => { t.classList.add('removing'); setTimeout(() => t.remove(), 300); }, 3500);
+}
+
+function animateNumber(el, start, end, duration, prefix = '') {
+  const startTime = performance.now();
+  function update(t) {
+    const p = Math.min((t - startTime) / duration, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = prefix + Math.round(start + (end - start) * eased);
+    if (p < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
+// ---- Auth ----
+async function checkAuth() {
+  try {
+    const data = await api('/api/auth/me');
+    if (data.authenticated) { currentUser = data.user; showApp(); return; }
+  } catch(e) {}
+  showLogin();
+}
+
+function showLogin() {
+  document.getElementById('login-overlay').classList.remove('hidden');
+  document.getElementById('app-container').style.display = 'none';
+}
+
+function showApp() {
+  document.getElementById('login-overlay').classList.add('hidden');
+  document.getElementById('app-container').style.display = 'flex';
+  document.getElementById('user-name').textContent = currentUser.name;
+  document.getElementById('user-avatar').textContent = currentUser.avatar;
+  loadAll();
+}
+
+async function handleLogout() {
+  if (!confirm('Logout?')) return;
+  try { await api('/api/auth/logout', { method: 'POST', body: {} }); } catch(e) {}
+  currentUser = null;
+  showLogin();
+  toast('Logged out', 'info');
+}
 
 // ---- Navigation ----
 function navigateTo(page) {
-    document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.getElementById('page-' + page).classList.add('active');
-    document.querySelector(`[data-page="${page}"]`).classList.add('active');
-    updatePageHeader(page);
+  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const navBtn = document.querySelector(`[data-page="${page}"]`);
+  if (navBtn) navBtn.classList.add('active');
+  const titles = {
+    dashboard:["Dashboard","Overview of your library system"],
+    books:["Books Catalog","Browse and manage all books"],
+    members:["Members","Library members and their activity"],
+    borrowings:["Borrowings","Track all book borrowing records"],
+    fines:["Fines","Monitor and manage overdue fines"],
+    report:["DBMS Report","All DBMS topics covered in this project"],
+    erdiagram:["ER Diagram","Entity-Relationship diagram and schema"],
+    queries:["SQL Queries","Explore the DBMS concepts used"]
+  };
+  const t = titles[page] || ["Dashboard",""];
+  document.getElementById('page-title').textContent = t[0];
+  document.getElementById('page-subtitle').textContent = t[1];
 }
 
-function updatePageHeader(page) {
-    const titles = {
-        dashboard: ["Dashboard", "Overview of your library system"],
-        books: ["Books Catalog", "Browse and manage all books"],
-        members: ["Members", "Library members and their activity"],
-        borrowings: ["Borrowings", "Track all book borrowing records"],
-        fines: ["Fines", "Monitor and manage overdue fines"],
-        report: ["DBMS Report", "All DBMS topics covered in this project"],
-        erdiagram: ["ER Diagram", "Entity-Relationship diagram and schema"],
-        queries: ["SQL Queries", "Explore the DBMS concepts used in this project"]
-    };
-    const t = titles[page] || ["Dashboard",""];
-    document.getElementById('page-title').textContent = t[0];
-    document.getElementById('page-subtitle').textContent = t[1];
+// ---- Load All Data ----
+function loadAll() {
+  renderDashboard();
+  renderBooks();
+  renderMembers();
+  renderBorrowings();
+  renderFines();
+  renderERDiagram();
+  loadQueryList();
+  navigateTo('dashboard');
 }
 
-// ---- Render Functions ----
-function renderDashboard() {
-    const totalBooks = books.reduce((s,b) => s + b.total, 0);
-    const activeB = borrowings.filter(b => b.status === 'Borrowed').length;
-    const overdueB = borrowings.filter(b => b.status === 'Overdue').length;
-    const unpaid = fines.filter(f => !f.paid).reduce((s,f) => s + f.amount, 0);
-
-    document.getElementById('stat-books').textContent = totalBooks;
-    document.getElementById('stat-members').textContent = members.length;
-    document.getElementById('stat-borrows').textContent = activeB + overdueB;
-    document.getElementById('stat-fines').textContent = '₹' + unpaid;
-
-    // Recent borrowings table
+// ---- Dashboard ----
+async function renderDashboard() {
+  try {
+    const s = await api('/api/stats');
+    const els = [
+      ['stat-books', s.totalCopies, ''],
+      ['stat-members', s.totalMembers, ''],
+      ['stat-borrows', s.activeBorrows, ''],
+      ['stat-fines', s.unpaidFines, '₹']
+    ];
+    els.forEach(([id, val, pre]) => {
+      const el = document.getElementById(id);
+      animateNumber(el, 0, val, 1000, pre);
+    });
+    // Recent borrowings
+    const borrows = await api('/api/borrowings');
     const tbody = document.getElementById('recent-borrows-body');
-    tbody.innerHTML = borrowings.slice(-5).reverse().map(b => `
-        <tr>
-            <td style="color:var(--text-primary);font-weight:500">${b.book}</td>
-            <td>${b.member}</td>
-            <td>${b.bDate}</td>
-            <td>${b.dDate}</td>
-            <td><span class="badge ${b.status==='Returned'?'badge-success':b.status==='Overdue'?'badge-danger':'badge-warning'}">${b.status}</span></td>
-        </tr>
-    `).join('');
-
+    tbody.innerHTML = borrows.slice(0, 5).map(b => `<tr>
+      <td style="color:var(--text-primary);font-weight:500">${b.book_title}</td>
+      <td>${b.member_name}</td><td>${b.borrow_date}</td><td>${b.due_date}</td>
+      <td><span class="badge ${b.status==='Returned'?'badge-success':b.status==='Overdue'?'badge-danger':'badge-warning'}">${b.status}</span></td>
+    </tr>`).join('');
     // Category distribution
+    const books = await api('/api/books');
+    const totalBooks = books.reduce((s,b) => s + b.total_copies, 0);
     const catCounts = {};
-    books.forEach(b => { catCounts[b.category] = (catCounts[b.category]||0) + b.total; });
-    const catList = document.getElementById('category-list');
-    catList.innerHTML = Object.entries(catCounts).sort((a,b)=>b[1]-a[1]).map(([cat,count]) => {
-        const pct = Math.round(count / totalBooks * 100);
-        const color = categoryColors[cat] || '#64748b';
+    books.forEach(b => { catCounts[b.category] = (catCounts[b.category]||0) + b.total_copies; });
+    document.getElementById('category-list').innerHTML = Object.entries(catCounts)
+      .sort((a,b) => b[1]-a[1]).map(([cat,count]) => {
+        const pct = Math.round(count/totalBooks*100);
+        const color = categoryColors[cat]||'#64748b';
         return `<div style="margin-bottom:14px">
-            <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-                <span style="font-size:13px;font-weight:500">${cat}</span>
-                <span style="font-size:12px;color:var(--text-muted)">${count} copies (${pct}%)</span>
-            </div>
-            <div style="height:6px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden">
-                <div style="height:100%;width:${pct}%;background:${color};border-radius:3px;transition:width 1s ease"></div>
-            </div>
-        </div>`;
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+            <span style="font-size:13px;font-weight:500">${cat}</span>
+            <span style="font-size:12px;color:var(--text-muted)">${count} copies (${pct}%)</span>
+          </div>
+          <div style="height:6px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:${color};border-radius:3px;transition:width 1s ease"></div>
+          </div></div>`;
+      }).join('');
+  } catch(e) { console.error('Dashboard error:', e); }
+}
+
+// ---- Books ----
+async function renderBooks() {
+  try {
+    const books = await api('/api/books');
+    document.getElementById('books-count').textContent = `${books.length} books`;
+    document.getElementById('books-grid').innerHTML = books.map(b => {
+      const color = categoryColors[b.category]||'#64748b';
+      return `<div class="book-card">
+        <span class="book-category" style="background:${color}20;color:${color}">${b.category||'—'}</span>
+        <h4>${b.title}</h4>
+        <p class="book-author">by ${b.author||'Unknown'} · ${b.year_published||'—'}</p>
+        <div class="book-meta">
+          <span class="book-price">₹${b.price}</span>
+          <span class="book-stock">${b.available_copies}/${b.total_copies} available</span>
+        </div>
+      </div>`;
     }).join('');
+  } catch(e) { toast('Failed to load books', 'error'); }
 }
 
-function renderBooks() {
-    const grid = document.getElementById('books-grid');
-    grid.innerHTML = books.map(b => {
-        const color = categoryColors[b.category] || '#64748b';
-        return `<div class="book-card">
-            <span class="book-category" style="background:${color}20;color:${color}">${b.category}</span>
-            <h4>${b.title}</h4>
-            <p class="book-author">by ${b.author} · ${b.year}</p>
-            <div class="book-meta">
-                <span class="book-price">₹${b.price}</span>
-                <span class="book-stock">${b.available}/${b.total} available</span>
-            </div>
-        </div>`;
+// ---- Members ----
+async function renderMembers() {
+  try {
+    const members = await api('/api/members');
+    document.getElementById('members-count').textContent = `${members.length} members`;
+    document.getElementById('members-list').innerHTML = members.map((m,i) => {
+      const initials = (m.first_name[0]||'')+(m.last_name[0]||'');
+      const color = avatarColors[i % avatarColors.length];
+      const typeBadge = m.membership_type==='Premium'?'badge-purple':m.membership_type==='Student'?'badge-info':'badge-success';
+      return `<div class="member-row">
+        <div class="member-avatar" style="background:${color}">${initials}</div>
+        <div class="member-info"><h4>${m.first_name} ${m.last_name}</h4><p>${m.email||'—'}</p></div>
+        <span class="badge ${typeBadge}">${m.membership_type}</span>
+        <span style="font-size:12px;color:var(--text-muted);min-width:80px;text-align:right">${m.total_borrows||0} borrows</span>
+      </div>`;
     }).join('');
+  } catch(e) { toast('Failed to load members', 'error'); }
 }
 
-function renderMembers() {
-    const list = document.getElementById('members-list');
-    list.innerHTML = members.map((m,i) => {
-        const initials = m.name.split(' ').map(n=>n[0]).join('');
-        const color = avatarColors[i % avatarColors.length];
-        const typeBadge = m.type==='Premium'?'badge-purple':m.type==='Student'?'badge-info':'badge-success';
-        return `<div class="member-row">
-            <div class="member-avatar" style="background:${color}">${initials}</div>
-            <div class="member-info">
-                <h4>${m.name}</h4>
-                <p>${m.email}</p>
-            </div>
-            <span class="badge ${typeBadge}">${m.type}</span>
-            <span style="font-size:12px;color:var(--text-muted);min-width:80px;text-align:right">${m.borrows} borrows</span>
-        </div>`;
-    }).join('');
+// ---- Borrowings ----
+async function renderBorrowings() {
+  try {
+    const rows = await api('/api/borrowings');
+    document.getElementById('borrowings-count').textContent = `${rows.length} records`;
+    document.getElementById('borrowings-body').innerHTML = rows.map(b => `<tr>
+      <td>${b.borrow_id}</td>
+      <td style="color:var(--text-primary);font-weight:500">${b.book_title}</td>
+      <td>${b.member_name}</td><td>${b.borrow_date}</td><td>${b.due_date}</td>
+      <td>${b.return_date||'—'}</td>
+      <td><span class="badge ${b.status==='Returned'?'badge-success':b.status==='Overdue'?'badge-danger':'badge-warning'}">${b.status}</span></td>
+      <td>${b.status!=='Returned'?`<div class="table-actions"><button class="btn-icon success" onclick="returnBook(${b.borrow_id})" title="Return">↩️</button></div>`:'—'}</td>
+    </tr>`).join('');
+  } catch(e) { toast('Failed to load borrowings', 'error'); }
 }
 
-function renderBorrowings() {
-    const tbody = document.getElementById('borrowings-body');
-    tbody.innerHTML = borrowings.map(b => `
-        <tr>
-            <td>${b.id}</td>
-            <td style="color:var(--text-primary);font-weight:500">${b.book}</td>
-            <td>${b.member}</td>
-            <td>${b.bDate}</td>
-            <td>${b.dDate}</td>
-            <td>${b.rDate || '—'}</td>
-            <td><span class="badge ${b.status==='Returned'?'badge-success':b.status==='Overdue'?'badge-danger':'badge-warning'}">${b.status}</span></td>
-        </tr>
-    `).join('');
+async function returnBook(id) {
+  if (!confirm('Mark this book as returned?')) return;
+  try {
+    const res = await api(`/api/borrowings/${id}/return`, { method: 'PUT', body: {} });
+    toast(res.fine_amount > 0 ? `Returned! Fine: ₹${res.fine_amount} (${res.days_overdue} days overdue)` : 'Book returned successfully!', res.fine_amount > 0 ? 'info' : 'success');
+    renderBorrowings(); renderBooks(); renderDashboard(); renderFines();
+  } catch(e) { toast(e.message, 'error'); }
 }
 
-function renderFines() {
-    const tbody = document.getElementById('fines-body');
-    tbody.innerHTML = fines.map(f => `
-        <tr>
-            <td>${f.id}</td>
-            <td style="color:var(--text-primary);font-weight:500">${f.member}</td>
-            <td>${f.book}</td>
-            <td style="color:var(--accent-amber);font-weight:600">₹${f.amount}</td>
-            <td><span class="badge ${f.paid?'badge-success':'badge-danger'}">${f.paid?'Paid':'Unpaid'}</span></td>
-            <td>${f.date}</td>
-        </tr>
-    `).join('');
+// ---- Fines ----
+async function renderFines() {
+  try {
+    const rows = await api('/api/fines');
+    document.getElementById('fines-body').innerHTML = rows.map(f => `<tr>
+      <td>${f.fine_id}</td>
+      <td style="color:var(--text-primary);font-weight:500">${f.member_name}</td>
+      <td>${f.book_title}</td>
+      <td style="color:var(--accent-amber);font-weight:600">₹${f.amount}</td>
+      <td><span class="badge ${f.paid?'badge-success':'badge-danger'}">${f.paid?'Paid':'Unpaid'}</span></td>
+      <td>${f.fine_date}</td>
+      <td>${!f.paid?`<button class="btn btn-sm btn-success" onclick="payFine(${f.fine_id})">Pay</button>`:'✅'}</td>
+    </tr>`).join('');
+  } catch(e) { toast('Failed to load fines', 'error'); }
+}
+
+async function payFine(id) {
+  if (!confirm('Mark this fine as paid?')) return;
+  try {
+    await api(`/api/fines/${id}/pay`, { method: 'PUT', body: {} });
+    toast('Fine marked as paid!', 'success');
+    renderFines(); renderDashboard();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+// ---- Modals ----
+function openModal(title, bodyHTML, footerHTML) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = bodyHTML;
+  document.getElementById('modal-footer').innerHTML = footerHTML;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+function closeModal() { document.getElementById('modal-overlay').classList.remove('show'); }
+
+// ---- Book Modal ----
+async function openBookModal() {
+  let authors = [], cats = [], pubs = [];
+  try {
+    [authors, cats, pubs] = await Promise.all([
+      api('/api/books/authors'), api('/api/books/categories'), api('/api/books/publishers')
+    ]);
+  } catch(e) { toast('Failed to load form data', 'error'); return; }
+  const body = `
+    <div class="form-group"><label>Title *</label><input id="bf-title" placeholder="Book title"></div>
+    <div class="form-row">
+      <div class="form-group"><label>ISBN</label><input id="bf-isbn" placeholder="ISBN"></div>
+      <div class="form-group"><label>Price (₹)</label><input id="bf-price" type="number" placeholder="0"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Author</label><select id="bf-author"><option value="">Select</option>${authors.map(a=>`<option value="${a.author_id}">${a.name}</option>`).join('')}</select></div>
+      <div class="form-group"><label>Category</label><select id="bf-cat"><option value="">Select</option>${cats.map(c=>`<option value="${c.category_id}">${c.name}</option>`).join('')}</select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Publisher</label><select id="bf-pub"><option value="">Select</option>${pubs.map(p=>`<option value="${p.publisher_id}">${p.name}</option>`).join('')}</select></div>
+      <div class="form-group"><label>Copies</label><input id="bf-copies" type="number" value="1" min="1"></div>
+    </div>
+    <div class="form-group"><label>Year Published</label><input id="bf-year" type="number" placeholder="2024"></div>`;
+  const footer = `<button class="btn btn-outline" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveBook()">Add Book</button>`;
+  openModal('Add New Book', body, footer);
+}
+
+async function saveBook() {
+  const data = {
+    title: document.getElementById('bf-title').value,
+    isbn: document.getElementById('bf-isbn').value,
+    price: document.getElementById('bf-price').value,
+    author_id: document.getElementById('bf-author').value || null,
+    category_id: document.getElementById('bf-cat').value || null,
+    publisher_id: document.getElementById('bf-pub').value || null,
+    total_copies: document.getElementById('bf-copies').value,
+    year_published: document.getElementById('bf-year').value
+  };
+  if (!data.title) { toast('Title is required', 'error'); return; }
+  try {
+    await api('/api/books', { method: 'POST', body: data });
+    toast('Book added!', 'success'); closeModal(); renderBooks(); renderDashboard();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+// ---- Member Modal ----
+function openMemberModal() {
+  const body = `
+    <div class="form-row">
+      <div class="form-group"><label>First Name *</label><input id="mf-fn" placeholder="First name"></div>
+      <div class="form-group"><label>Last Name *</label><input id="mf-ln" placeholder="Last name"></div>
+    </div>
+    <div class="form-group"><label>Email</label><input id="mf-email" type="email" placeholder="email@example.com"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Phone</label><input id="mf-phone" placeholder="Phone number"></div>
+      <div class="form-group"><label>Membership</label><select id="mf-type"><option value="Basic">Basic</option><option value="Student">Student</option><option value="Premium">Premium</option></select></div>
+    </div>`;
+  const footer = `<button class="btn btn-outline" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveMember()">Add Member</button>`;
+  openModal('Add New Member', body, footer);
+}
+
+async function saveMember() {
+  const data = {
+    first_name: document.getElementById('mf-fn').value,
+    last_name: document.getElementById('mf-ln').value,
+    email: document.getElementById('mf-email').value,
+    phone: document.getElementById('mf-phone').value,
+    membership_type: document.getElementById('mf-type').value
+  };
+  if (!data.first_name || !data.last_name) { toast('Name is required', 'error'); return; }
+  try {
+    await api('/api/members', { method: 'POST', body: data });
+    toast('Member added!', 'success'); closeModal(); renderMembers(); renderDashboard();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+// ---- Borrow Modal ----
+async function openBorrowModal() {
+  let books = [], members = [];
+  try {
+    [books, members] = await Promise.all([
+      api('/api/borrowings/available-books'), api('/api/borrowings/members-list')
+    ]);
+  } catch(e) { toast('Failed to load form data', 'error'); return; }
+  const defaultDue = new Date(Date.now() + 14*86400000).toISOString().split('T')[0];
+  const body = `
+    <div class="form-group"><label>Book *</label><select id="brf-book"><option value="">Select a book</option>${books.map(b=>`<option value="${b.book_id}">${b.title} (${b.available_copies} avail)</option>`).join('')}</select></div>
+    <div class="form-group"><label>Member *</label><select id="brf-member"><option value="">Select a member</option>${members.map(m=>`<option value="${m.member_id}">${m.name}</option>`).join('')}</select></div>
+    <div class="form-group"><label>Due Date *</label><input id="brf-due" type="date" value="${defaultDue}"></div>`;
+  const footer = `<button class="btn btn-outline" onclick="closeModal()">Cancel</button><button class="btn btn-success" onclick="saveBorrow()">Issue Book</button>`;
+  openModal('Issue a Book', body, footer);
+}
+
+async function saveBorrow() {
+  const data = {
+    book_id: document.getElementById('brf-book').value,
+    member_id: document.getElementById('brf-member').value,
+    due_date: document.getElementById('brf-due').value
+  };
+  if (!data.book_id || !data.member_id || !data.due_date) { toast('All fields required', 'error'); return; }
+  try {
+    await api('/api/borrowings', { method: 'POST', body: data });
+    toast('Book issued!', 'success'); closeModal();
+    renderBorrowings(); renderBooks(); renderDashboard();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+// ---- Live SQL Query Runner ----
+async function loadQueryList() {
+  try {
+    const list = await api('/api/query/list');
+    document.getElementById('query-select-grid').innerHTML = list.map(q =>
+      `<button class="query-option" data-key="${q.key}" onclick="runQuery('${q.key}', this)">${q.label}</button>`
+    ).join('');
+  } catch(e) { console.error('Query list error:', e); }
+}
+
+async function runQuery(key, btn) {
+  document.querySelectorAll('.query-option').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const box = document.getElementById('query-result-box');
+  box.classList.add('show');
+  document.getElementById('qr-title').textContent = 'Loading...';
+  document.getElementById('qr-count').textContent = '';
+  document.getElementById('qr-sql').textContent = '';
+  document.getElementById('qr-table').innerHTML = '<tr><td class="loading-state"><span class="spinner"></span> Running query...</td></tr>';
+  try {
+    const res = await api('/api/query/run', { method: 'POST', body: { key } });
+    document.getElementById('qr-title').textContent = res.label;
+    document.getElementById('qr-count').textContent = `${res.count} rows`;
+    document.getElementById('qr-sql').textContent = res.sql;
+    const thead = `<thead><tr>${res.columns.map(c => `<th>${c}</th>`).join('')}</tr></thead>`;
+    const tbody = `<tbody>${res.rows.map(r => `<tr>${res.columns.map(c => `<td>${r[c]!==null&&r[c]!==undefined?r[c]:'—'}</td>`).join('')}</tr>`).join('')}</tbody>`;
+    document.getElementById('qr-table').innerHTML = thead + tbody;
+  } catch(e) { toast(e.message, 'error'); box.classList.remove('show'); }
 }
 
 // ---- Search ----
 function handleSearch(e) {
-    const q = e.target.value.toLowerCase();
-    const activePage = document.querySelector('.page-section.active')?.id?.replace('page-','');
-    if (activePage === 'books') {
-        const cards = document.querySelectorAll('.book-card');
-        cards.forEach(card => {
-            const text = card.textContent.toLowerCase();
-            card.style.display = text.includes(q) ? '' : 'none';
-        });
-    }
+  const q = e.target.value.toLowerCase();
+  const activePage = document.querySelector('.page-section.active')?.id?.replace('page-','');
+  if (activePage === 'books') {
+    document.querySelectorAll('.book-card').forEach(card => {
+      card.style.display = card.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  }
+}
+
+// ---- ER Diagram ----
+function renderERDiagram() {
+  const container = document.getElementById('er-diagram-visual');
+  if (!container) return;
+  const tables = [
+    {name:'AUTHORS',color:'#3b82f6',attrs:['author_id PK','first_name','last_name','email UK','nationality']},
+    {name:'PUBLISHERS',color:'#8b5cf6',attrs:['publisher_id PK','name UK','address','phone','email UK']},
+    {name:'CATEGORIES',color:'#10b981',attrs:['category_id PK','name UK','description']},
+    {name:'BOOKS',color:'#f59e0b',attrs:['book_id PK','title','isbn UK','author_id FK','publisher_id FK','category_id FK','price','total_copies','available_copies']},
+    {name:'MEMBERS',color:'#f43f5e',attrs:['member_id PK','first_name','last_name','email UK','phone','membership_type']},
+    {name:'STAFF',color:'#06b6d4',attrs:['staff_id PK','first_name','last_name','email UK','role','salary']},
+    {name:'BORROWINGS',color:'#ec4899',attrs:['borrow_id PK','book_id FK','member_id FK','staff_id FK','borrow_date','due_date','return_date','status']},
+    {name:'FINES',color:'#14b8a6',attrs:['fine_id PK','borrow_id FK','amount','paid','fine_date']},
+    {name:'RESERVATIONS',color:'#6366f1',attrs:['reservation_id PK','book_id FK','member_id FK','reservation_date','status']}
+  ];
+  container.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+      ${tables.map(t => `
+        <div style="background:rgba(0,0,0,0.3);border:2px solid ${t.color}40;border-radius:12px;overflow:hidden">
+          <div style="background:${t.color}20;padding:10px 14px;border-bottom:1px solid ${t.color}30;display:flex;align-items:center;gap:8px">
+            <div style="width:8px;height:8px;border-radius:50%;background:${t.color}"></div>
+            <span style="font-size:13px;font-weight:700;color:${t.color}">${t.name}</span>
+          </div>
+          <div style="padding:10px 14px">
+            ${t.attrs.map(a => {
+              const isPK=a.includes('PK'),isFK=a.includes('FK'),isUK=a.includes('UK');
+              const name=a.replace(' PK','').replace(' FK','').replace(' UK','');
+              let badge='';
+              if(isPK) badge='<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(16,185,129,0.2);color:#10b981;font-weight:700;margin-left:auto">PK</span>';
+              if(isFK) badge='<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(59,130,246,0.2);color:#3b82f6;font-weight:700;margin-left:auto">FK</span>';
+              if(isUK) badge='<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(139,92,246,0.2);color:#8b5cf6;font-weight:700;margin-left:auto">UK</span>';
+              return `<div style="display:flex;align-items:center;padding:3px 0;font-size:12px;color:#94a3b8;gap:6px">
+                <span style="color:${isPK?'#10b981':isFK?'#3b82f6':'#94a3b8'};font-weight:${isPK?'600':'400'}">${name}</span>${badge}</div>`;
+            }).join('')}
+          </div>
+        </div>`).join('')}
+    </div>
+    <div style="margin-top:24px;display:flex;gap:20px;justify-content:center;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:rgba(16,185,129,0.3)"></span> PK = Primary Key</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:rgba(59,130,246,0.3)"></span> FK = Foreign Key</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:rgba(139,92,246,0.3)"></span> UK = Unique Key</div>
+    </div>`;
 }
 
 // ---- Initialize ----
 document.addEventListener('DOMContentLoaded', () => {
-    renderDashboard();
-    renderBooks();
-    renderMembers();
-    renderBorrowings();
-    renderFines();
-    renderERDiagram();
-    navigateTo('dashboard');
-
-    // Animate stat numbers
-    document.querySelectorAll('.stat-value').forEach(el => {
-        const target = el.textContent;
-        if (target.startsWith('₹')) {
-            const num = parseInt(target.replace('₹',''));
-            animateNumber(el, 0, num, 1000, '₹');
-        } else {
-            animateNumber(el, 0, parseInt(target), 1000);
-        }
-    });
-});
-
-function renderERDiagram() {
-    const container = document.getElementById('er-diagram-visual');
-    if (!container) return;
-    const tables = [
-        {name:'AUTHORS',color:'#3b82f6',attrs:['author_id PK','first_name','last_name','email UK','nationality']},
-        {name:'PUBLISHERS',color:'#8b5cf6',attrs:['publisher_id PK','name UK','address','phone','email UK']},
-        {name:'CATEGORIES',color:'#10b981',attrs:['category_id PK','name UK','description']},
-        {name:'BOOKS',color:'#f59e0b',attrs:['book_id PK','title','isbn UK','author_id FK','publisher_id FK','category_id FK','price','total_copies','available_copies']},
-        {name:'MEMBERS',color:'#f43f5e',attrs:['member_id PK','first_name','last_name','email UK','phone','membership_type']},
-        {name:'STAFF',color:'#06b6d4',attrs:['staff_id PK','first_name','last_name','email UK','role','salary']},
-        {name:'BORROWINGS',color:'#ec4899',attrs:['borrow_id PK','book_id FK','member_id FK','staff_id FK','borrow_date','due_date','return_date','status']},
-        {name:'FINES',color:'#14b8a6',attrs:['fine_id PK','borrow_id FK','amount','paid','fine_date']},
-        {name:'RESERVATIONS',color:'#6366f1',attrs:['reservation_id PK','book_id FK','member_id FK','reservation_date','status']}
-    ];
-    container.innerHTML = `
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
-            ${tables.map(t => `
-                <div style="background:rgba(0,0,0,0.3);border:2px solid ${t.color}40;border-radius:12px;overflow:hidden">
-                    <div style="background:${t.color}20;padding:10px 14px;border-bottom:1px solid ${t.color}30;display:flex;align-items:center;gap:8px">
-                        <div style="width:8px;height:8px;border-radius:50%;background:${t.color}"></div>
-                        <span style="font-size:13px;font-weight:700;color:${t.color}">${t.name}</span>
-                    </div>
-                    <div style="padding:10px 14px">
-                        ${t.attrs.map(a => {
-                            const isPK = a.includes('PK');
-                            const isFK = a.includes('FK');
-                            const isUK = a.includes('UK');
-                            const name = a.replace(' PK','').replace(' FK','').replace(' UK','');
-                            let badge = '';
-                            if(isPK) badge = '<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(16,185,129,0.2);color:#10b981;font-weight:700;margin-left:auto">PK</span>';
-                            if(isFK) badge = '<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(59,130,246,0.2);color:#3b82f6;font-weight:700;margin-left:auto">FK</span>';
-                            if(isUK) badge = '<span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(139,92,246,0.2);color:#8b5cf6;font-weight:700;margin-left:auto">UK</span>';
-                            return `<div style="display:flex;align-items:center;padding:3px 0;font-size:12px;color:#94a3b8;gap:6px">
-                                <span style="color:${isPK?'#10b981':isFK?'#3b82f6':'#94a3b8'};font-weight:${isPK?'600':'400'}">${name}</span>
-                                ${badge}
-                            </div>`;
-                        }).join('')}
-                    </div>
-                </div>
-            `).join('')}
-        </div>
-        <div style="margin-top:24px;display:flex;gap:20px;justify-content:center;flex-wrap:wrap">
-            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8">
-                <span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:rgba(16,185,129,0.3)"></span> PK = Primary Key
-            </div>
-            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8">
-                <span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:rgba(59,130,246,0.3)"></span> FK = Foreign Key
-            </div>
-            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8">
-                <span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:rgba(139,92,246,0.3)"></span> UK = Unique Key
-            </div>
-        </div>
-    `;
-}
-
-function animateNumber(el, start, end, duration, prefix = '') {
-    const startTime = performance.now();
-    function update(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        const current = Math.round(start + (end - start) * eased);
-        el.textContent = prefix + current;
-        if (progress < 1) requestAnimationFrame(update);
+  // Login form
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errEl = document.getElementById('login-error');
+    errEl.classList.remove('show');
+    try {
+      const res = await api('/api/auth/login', {
+        method: 'POST',
+        body: { username: document.getElementById('login-user').value, password: document.getElementById('login-pass').value }
+      });
+      currentUser = res.user;
+      toast(`Welcome, ${currentUser.name}!`, 'success');
+      showApp();
+    } catch(e) {
+      errEl.textContent = e.message;
+      errEl.classList.add('show');
     }
-    requestAnimationFrame(update);
-}
+  });
+  // Modal close on overlay click
+  document.getElementById('modal-overlay').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+  checkAuth();
+});

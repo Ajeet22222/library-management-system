@@ -16,6 +16,8 @@ USE library_management;
 -- --------------------------
 -- 2. DROP TABLES (if re-running)
 -- --------------------------
+DROP TABLE IF EXISTS audit_logs;
+DROP TABLE IF EXISTS book_copies;
 DROP TABLE IF EXISTS fines;
 DROP TABLE IF EXISTS reservations;
 DROP TABLE IF EXISTS borrowings;
@@ -206,23 +208,71 @@ CREATE TABLE reservations (
         ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+-- --------------------------
+-- TABLE: book_copies
+-- Individual copy-level records for multi-copy tracking
+-- Constraints: PK, FK, NOT NULL, UNIQUE, ENUM, DEFAULT
+-- --------------------------
+CREATE TABLE book_copies (
+    copy_id          INT             PRIMARY KEY AUTO_INCREMENT,
+    book_id          INT             NOT NULL,
+    copy_number      INT             NOT NULL,
+    condition_status ENUM('Good', 'Damaged', 'Lost', 'Retired') NOT NULL DEFAULT 'Good',
+    location         VARCHAR(50)     DEFAULT 'Main Shelf',
+    acquired_date    DATE            NOT NULL DEFAULT (CURRENT_DATE),
+
+    -- Foreign Key
+    CONSTRAINT fk_copy_book FOREIGN KEY (book_id) REFERENCES books(book_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    -- Unique: each book has unique copy numbers
+    CONSTRAINT uq_book_copy UNIQUE(book_id, copy_number)
+);
+
+-- --------------------------
+-- TABLE: audit_logs
+-- Tracks who did what and when (audit trail)
+-- Constraints: PK, FK, NOT NULL, ENUM, DEFAULT
+-- --------------------------
+CREATE TABLE audit_logs (
+    log_id      INT             PRIMARY KEY AUTO_INCREMENT,
+    action_type ENUM('INSERT', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT') NOT NULL,
+    table_name  VARCHAR(50)     NOT NULL,
+    record_id   INT,
+    staff_id    INT,
+    old_values  TEXT,
+    new_values  TEXT,
+    action_time TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+    ip_address  VARCHAR(45),
+
+    -- Foreign Key
+    CONSTRAINT fk_audit_staff FOREIGN KEY (staff_id) REFERENCES staff(staff_id)
+        ON DELETE SET NULL ON UPDATE CASCADE
+);
+
 -- ============================================================
 -- 4. ALTER TABLE DEMONSTRATION
--- Adding a column after table creation
+-- Adding columns after table creation
 -- ============================================================
 ALTER TABLE members ADD COLUMN date_of_birth DATE AFTER address;
 
 ALTER TABLE books ADD COLUMN edition INT DEFAULT 1 AFTER published_year;
 
+-- Add membership expiry tracking
+ALTER TABLE members ADD COLUMN expiry_date DATE AFTER membership_type;
+
+-- Add staff password for login system
+ALTER TABLE staff ADD COLUMN password_hash VARCHAR(255) AFTER role;
+
 -- ============================================================
 -- SUMMARY OF CONSTRAINTS USED:
--- PRIMARY KEY    — All tables
--- FOREIGN KEY    — books, borrowings, fines, reservations
+-- PRIMARY KEY    — All 11 tables
+-- FOREIGN KEY    — books, borrowings, fines, reservations, book_copies, audit_logs
 -- NOT NULL       — Multiple columns across all tables
--- UNIQUE         — isbn, emails
+-- UNIQUE         — isbn, emails, book_copy combination
 -- CHECK          — email format, price >= 0, year range, salary >= 0
--- DEFAULT        — join_date, membership_type, salary, status, etc.
+-- DEFAULT        — join_date, membership_type, salary, status, condition, etc.
 -- AUTO_INCREMENT — All primary keys
--- ENUM           — membership_type, role, status
--- ON DELETE/UPDATE — CASCADE, RESTRICT
+-- ENUM           — membership_type, role, status, condition_status, action_type
+-- ON DELETE/UPDATE — CASCADE, RESTRICT, SET NULL
 -- ============================================================

@@ -54,6 +54,7 @@ async function checkAuth() {
 
 function showLogin() {
   document.getElementById('login-overlay').classList.remove('hidden');
+  document.getElementById('login-overlay').style.display = 'flex';
   document.getElementById('app-container').style.display = 'none';
 }
 
@@ -66,11 +67,15 @@ function showApp() {
 }
 
 async function handleLogout() {
-  if (!confirm('Logout?')) return;
   try { await api('/api/auth/logout', { method: 'POST', body: {} }); } catch(e) {}
   currentUser = null;
-  showLogin();
-  toast('Logged out', 'info');
+  document.getElementById('login-overlay').classList.remove('hidden');
+  document.getElementById('login-overlay').style.display = 'flex';
+  document.getElementById('app-container').style.display = 'none';
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-error').classList.remove('show');
+  toast('Logged out successfully', 'info');
 }
 
 // ---- Navigation ----

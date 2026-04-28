@@ -37,7 +37,7 @@ router.get('/', requireAuth, (req, res) => {
 
 // GET /api/books/authors — for dropdown
 router.get('/authors', requireAuth, (req, res) => {
-  const authors = db.prepare('SELECT author_id, first_name || " " || last_name AS name FROM authors ORDER BY first_name').all();
+  const authors = db.prepare("SELECT author_id, first_name || ' ' || last_name AS name FROM authors ORDER BY first_name").all();
   res.json(authors);
 });
 
